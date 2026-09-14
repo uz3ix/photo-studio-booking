@@ -1,96 +1,119 @@
+from pathlib import Path
 
-def authorisation(login, password):
-    with open("DB_txt/users.txt", "r", encoding="utf-8") as file:
-        users = file.readlines()
-        if (login + ":" + password in users):
-            print("Авторизация прошла успешно")
-            return True
-        else: 
-            print("Неверный логин и пароль")
-            return False
-            
-def choose_studio():
-    with open("DB_txt/studios.txt", "r", encoding="utf-8") as file:
-        studios = file.readlines()
-        for i in range(len(studios)):
-            print(f"{i + 1}. {studios[i].strip()}")
-        print("Выберите студию по номеру: ")
-        choice = int(input())
-        
-        return studios[choice - 1].strip()
-      
-def write_order(studio, date, start_time, end_time):
-    print(f"Вы выбали студию: {studio}, дата: {date}, время с {start_time}:00 до {end_time}:00")
-          
-            
-def choose_date_of_booking():
-    input_date = input("Напишите дату бронирования (2026.01.01): ").strip()
+from module.bookings import create_booking, is_available
+from module.storage import load_json, save_json
+from module.studios import get_studio, search_studios, sort_studios_by_price
+from module.users import authorisation, register_user
+from module.utils import input_date, input_int, input_range
 
-    with open("DB_txt/date_of_booking.txt", "r", encoding="utf-8") as file:
-        dates = file.readlines()
+DATA_DIR = Path(__file__).resolve().parent / "data"
 
-    print("Расписание на выбранный день:")
 
+def show_studios(studios: list[dict]) -> None:
+    """Показать каталог с характеристиками студий."""
+    if not studios:
+        print("Студии не найдены")
+    for studio in studios:
+        print(f'{studio["id"]}. {studio["name"]}: '
+              f'{studio["area"]} м², '
+              f'{studio["price_per_hour"]} руб./час')
+
+
+def choose_date_of_booking(bookings: list[dict],
+                           studio_id: int) -> tuple[str, int, int]:
+    """Выбрать день, показать расписание и запросить часы."""
+    booking_date = input_date("Дата (ГГГГ.ММ.ДД): ").isoformat()
     for hour in range(9, 18):
-        is_busy = False
+        available = is_available(bookings, studio_id, booking_date,
+                                 hour, hour + 1)
+        status = "свободно" if available else "занято"
+        print(f"{hour}:00–{hour + 1}:00 — {status}")
+    start = input_range("Час начала: ", 9, 17)
+    end = input_range("Час окончания: ", 10, 18)
+    return booking_date, start, end
 
-        for date in dates:
-            parts = date.split()
 
-            if parts and input_date == parts[0]:
-                times = parts[1].split("-")
+def show_bookings(bookings: list[dict], studios: list[dict],
+                  login: str) -> None:
+    """Вывести бронирования текущего пользователя."""
+    own = [b for b in bookings if b.get("login") == login]
+    if not own:
+        print("У вас пока нет бронирований")
+    for booking in own:
+        studio = get_studio(studios, booking["studio_id"])
+        print(f'№{booking["id"]}: {studio["name"]}, '
+              f'{booking["booking_date"]}, '
+              f'{booking["start_hour"]}:00–{booking["end_hour"]}:00, '
+              f'{booking["total_price"]} руб.')
 
-                busy_start = int(times[0].split(":")[0])
-                busy_end = int(times[1].split(":")[0])
 
-                if busy_start <= hour < busy_end:
-                    is_busy = True
-                    break
-
-        if is_busy:
-            print(f"{hour}:00 - {hour + 1}:00 - занято")
-        else:
-            print(f"{hour}:00 - {hour + 1}:00 - свободно")
-
-    start_time = int(input("Час начала (например, 14): "))
-    end_time = int(input("Час окончания (например, 16): "))
-
-    if not (9 <= start_time < end_time <= 18):
-        print("Нужно выбрать интервал с 9 до 18, начало раньше окончания")
+def main() -> None:
+    """Загрузить данные и выполнять действия меню до выхода."""
+    try:
+        users = load_json(DATA_DIR / "users.json")
+        studios = load_json(DATA_DIR / "studios.json")
+        bookings = load_json(DATA_DIR / "date_of_booking.json")
+    except (OSError, ValueError) as error:
+        print(f"Не удалось загрузить данные: {error}")
         return
 
-    for date in dates:
-        parts = date.split()
+    user = None
+    while user is None:
+        print("\n1. Вход\n2. Регистрация\n0. Выход")
+        action = input_range("Действие: ", 0, 2)
+        if action == 0:
+            return
+        login = input("Логин: ").strip()
+        password = input("Пароль: ")
+        try:
+            if action == 1:
+                user = authorisation(users, login, password)
+            else:
+                updated_users = users.copy()
+                registered = register_user(updated_users, login, password)
+                save_json(DATA_DIR / "users.json", updated_users)
+                users = updated_users
+                user = registered
+            print("Вы вошли в аккаунт")
+        except (ValueError, OSError) as error:
+            print(error)
 
-        if parts and input_date == parts[0]:
-            times = parts[1].split("-")
-
-            busy_start = int(times[0].split(":")[0])
-            busy_end = int(times[1].split(":")[0])
-
-            if start_time < busy_end and end_time > busy_start:
-                print("Выбранный интервал пересекается с существующей бронью")
+    while True:
+        print("\n1. Все студии\n2. Поиск по названию\n"
+              "3. Информация о студии\n4. Бронирование\n"
+              "5. Мои бронирования\n6. Студии по цене\n0. Выход")
+        action = input_range("Действие: ", 0, 6)
+        try:
+            if action == 0:
                 return
-    return input_date, start_time, end_time
-                    
-        
+            elif action == 1:
+                show_studios(studios)
+            elif action == 2:
+                show_studios(search_studios(studios, input("Название: ")))
+            elif action == 3:
+                studio = get_studio(studios, input_int("Номер студии: "))
+                show_studios([studio])
+            elif action == 4:
+                show_studios(studios)
+                studio = get_studio(studios, input_int("Номер студии: "))
+                day, start, end = choose_date_of_booking(
+                    bookings, studio["id"]
+                )
+                updated_bookings = bookings.copy()
+                booking = create_booking(updated_bookings, studio,
+                                         user["login"], day, start, end)
+                save_json(DATA_DIR / "date_of_booking.json",
+                          updated_bookings)
+                bookings = updated_bookings
+                print(f'Бронь №{booking["id"]} сохранена. '
+                      f'Стоимость: {booking["total_price"]} руб.')
+            elif action == 5:
+                show_bookings(bookings, studios, user["login"])
+            elif action == 6:
+                show_studios(sort_studios_by_price(studios))
+        except (ValueError, OSError) as error:
+            print(error)
 
-def main():
-    print("Войдите в аккаунт")
-    login = input("Введите логин: ")
-    password = input("Введите пароль: ")
-    
-    if (authorisation(login, password)):
-        print("Выберите фотостудию")
-        choice = choose_studio()
-        result = choose_date_of_booking()
 
-        if result is None:
-            return 
-        
-        date, start_time, end_time = result
-        write_order(choice, date, start_time, end_time)
-        
 if __name__ == "__main__":
     main()
-    
