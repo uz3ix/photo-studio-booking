@@ -1,4 +1,6 @@
-def add_studio(studios: list[dict], name: str, area: float, price_per_hour: float) -> None:
+def add_studio(
+    studios: list[dict], name: str, area: float, price_per_hour: float
+) -> None:
     """Добавить студию с новым идентификатором."""
     if not name.strip() or area <= 0 or price_per_hour <= 0:
         raise ValueError("Укажите название, положительные площадь и цену")
@@ -22,7 +24,9 @@ def get_studio(studios: list[dict], studio_id: int) -> dict:
     raise ValueError("Студия с таким номером не найдена")
 
 
-def filter_studios_by_price(studios: list[dict], max_price: float) -> list[dict]:
+def filter_studios_by_price(
+    studios: list[dict], max_price: float
+) -> list[dict]:
     """Выбрать студии не дороже заданной цены."""
     return [s for s in studios if s["price_per_hour"] <= max_price]
 
