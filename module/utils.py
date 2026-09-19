@@ -17,9 +17,7 @@ def input_date(prompt: str) -> date:
     """Запросить у пользователя дату в формате 2026.01.01."""
     while True:
         try:
-            return datetime.strptime(
-                input(prompt).strip(), "%Y.%m.%d"
-            ).date()
+            return datetime.strptime(input(prompt).strip(), "%Y.%m.%d").date()
         except ValueError:
             print("Неверный формат даты, пример: 2026.01.01")
 

@@ -14,18 +14,25 @@ def show_studios(studios: list[dict]) -> None:
     if not studios:
         print("Студии не найдены")
     for studio in studios:
-        print(f'{studio["id"]}. {studio["name"]}: '
-              f'{studio["area"]} м², '
-              f'{studio["price_per_hour"]} руб./час')
+        print(
+            f'{studio["id"]}. {studio["name"]}: '
+            f'{studio["area"]} м², '
+            f'{studio["price_per_hour"]} руб./час'
+        )
 
 
-def choose_date_of_booking(bookings: list[dict],
-                           studio_id: int) -> tuple[str, int, int]:
+def choose_date_of_booking(
+    bookings: list[dict], studio_id: int
+) -> tuple[str, int, int]:
     """Выбрать день, показать расписание и запросить часы."""
     booking_date = input_date("Дата (ГГГГ.ММ.ДД): ").isoformat()
     for hour in range(9, 18):
-        available = is_available(bookings, studio_id, booking_date,
-                                 hour, hour + 1)
+        available = is_available(
+            bookings,
+            studio_id,
+            booking_date,
+            hour,
+            hour + 1)
         status = "свободно" if available else "занято"
         print(f"{hour}:00–{hour + 1}:00 — {status}")
     start = input_range("Час начала: ", 9, 17)
@@ -33,18 +40,22 @@ def choose_date_of_booking(bookings: list[dict],
     return booking_date, start, end
 
 
-def show_bookings(bookings: list[dict], studios: list[dict],
-                  login: str) -> None:
+def show_bookings(
+        bookings: list[dict],
+        studios: list[dict],
+        login: str) -> None:
     """Вывести бронирования текущего пользователя."""
     own = [b for b in bookings if b.get("login") == login]
     if not own:
         print("У вас пока нет бронирований")
     for booking in own:
         studio = get_studio(studios, booking["studio_id"])
-        print(f'№{booking["id"]}: {studio["name"]}, '
-              f'{booking["booking_date"]}, '
-              f'{booking["start_hour"]}:00–{booking["end_hour"]}:00, '
-              f'{booking["total_price"]} руб.')
+        print(
+            f'№{booking["id"]}: {studio["name"]}, '
+            f'{booking["booking_date"]}, '
+            f'{booking["start_hour"]}:00–{booking["end_hour"]}:00, '
+            f'{booking["total_price"]} руб.'
+        )
 
 
 def main() -> None:
@@ -79,9 +90,11 @@ def main() -> None:
             print(error)
 
     while True:
-        print("\n1. Все студии\n2. Поиск по названию\n"
-              "3. Информация о студии\n4. Бронирование\n"
-              "5. Мои бронирования\n6. Студии по цене\n0. Выход")
+        print(
+            "\n1. Все студии\n2. Поиск по названию\n"
+            "3. Информация о студии\n4. Бронирование\n"
+            "5. Мои бронирования\n6. Студии по цене\n0. Выход"
+        )
         action = input_range("Действие: ", 0, 6)
         try:
             if action == 0:
@@ -97,16 +110,17 @@ def main() -> None:
                 show_studios(studios)
                 studio = get_studio(studios, input_int("Номер студии: "))
                 day, start, end = choose_date_of_booking(
-                    bookings, studio["id"]
-                )
+                    bookings, studio["id"])
                 updated_bookings = bookings.copy()
-                booking = create_booking(updated_bookings, studio,
-                                         user["login"], day, start, end)
-                save_json(DATA_DIR / "date_of_booking.json",
-                          updated_bookings)
+                booking = create_booking(
+                    updated_bookings, studio, user["login"], day, start, end
+                )
+                save_json(DATA_DIR / "date_of_booking.json", updated_bookings)
                 bookings = updated_bookings
-                print(f'Бронь №{booking["id"]} сохранена. '
-                      f'Стоимость: {booking["total_price"]} руб.')
+                print(
+                    f'Бронь №{booking["id"]} сохранена. '
+                    f'Стоимость: {booking["total_price"]} руб.'
+                )
             elif action == 5:
                 show_bookings(bookings, studios, user["login"])
             elif action == 6:
