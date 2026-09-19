@@ -1,16 +1,22 @@
 [
-    {
-        "id": 1, 
-        "studio_id": 1, 
-        "booking_date": "2026-01-01", 
-        "start_hour": 14, 
-        "end_hour": 16
-    },
-    {
-        "id": 2, 
-        "studio_id": 1, 
-        "booking_date": "2026-01-02", 
-        "start_hour": 10, 
-        "end_hour": 12
-    }
+  {
+    "id": 1,
+    "studio_id": 1,
+    "booking_date": "2026-01-01",
+    "start_hour": 14,
+    "end_hour": 16,
+    "user_id": 3,
+    "is_cancelled": false,
+    "total_price": 2000
+  },
+  {
+    "id": 2,
+    "studio_id": 1,
+    "booking_date": "2026-01-02",
+    "start_hour": 10,
+    "end_hour": 12,
+    "user_id": 3,
+    "is_cancelled": false,
+    "total_price": 2000
+  }
 ]

@@ -1,28 +1,31 @@
+from copy import copy
 from pathlib import Path
 
-from module.bookings import create_booking, is_available
-from module.storage import load_json, save_json
-from module.studios import get_studio, search_studios, sort_studios_by_price
-from module.users import authorisation, register_user
+from module.bookings import (
+    Booking, cancel_booking, create_booking, is_available,
+)
+from module.storage import (
+    load_bookings, load_studios, load_users, save_bookings, save_users,
+)
+from module.studios import (
+    Studio, get_studio, search_studios, sort_studios_by_price,
+)
+from module.users import User, authorisation, register_user
 from module.utils import input_date, input_int, input_range
 
 DATA_DIR = Path(__file__).resolve().parent / "data"
 
 
-def show_studios(studios: list[dict]) -> None:
-    """Показать каталог с характеристиками студий."""
+def show_studios(studios: list[Studio]) -> None:
+    """Показать каталог через строковое представление объектов."""
     if not studios:
         print("Студии не найдены")
     for studio in studios:
-        print(
-            f'{studio["id"]}. {studio["name"]}: '
-            f'{studio["area"]} м², '
-            f'{studio["price_per_hour"]} руб./час'
-        )
+        print(studio)
 
 
 def choose_date_of_booking(
-    bookings: list[dict], studio_id: int
+    bookings: list[Booking], studio_id: int
 ) -> tuple[str, int, int]:
     """Выбрать день, показать расписание и запросить часы."""
     booking_date = input_date("Дата (ГГГГ.ММ.ДД): ").isoformat()
@@ -40,31 +43,24 @@ def choose_date_of_booking(
     return booking_date, start, end
 
 
-def show_bookings(
-        bookings: list[dict],
-        studios: list[dict],
-        login: str) -> None:
-    """Вывести бронирования текущего пользователя."""
-    own = [b for b in bookings if b.get("login") == login]
+def show_bookings(bookings: list[Booking], user: User) -> None:
+    """Показать собственные бронирования, включая отменённые."""
+    own = [b for b in bookings if b.user.id == user.id]
     if not own:
         print("У вас пока нет бронирований")
     for booking in own:
-        studio = get_studio(studios, booking["studio_id"])
-        print(
-            f'№{booking["id"]}: {studio["name"]}, '
-            f'{booking["booking_date"]}, '
-            f'{booking["start_hour"]}:00–{booking["end_hour"]}:00, '
-            f'{booking["total_price"]} руб.'
-        )
+        print(booking)
 
 
 def main() -> None:
     """Загрузить данные и выполнять действия меню до выхода."""
     try:
-        users = load_json(DATA_DIR / "users.json")
-        studios = load_json(DATA_DIR / "studios.json")
-        bookings = load_json(DATA_DIR / "date_of_booking.json")
-    except (OSError, ValueError) as error:
+        users = load_users(DATA_DIR / "users.json")
+        studios = load_studios(DATA_DIR / "studios.json")
+        bookings = load_bookings(
+            DATA_DIR / "date_of_booking.json", studios, users
+        )
+    except (OSError, ValueError, KeyError, TypeError) as error:
         print(f"Не удалось загрузить данные: {error}")
         return
 
@@ -82,7 +78,7 @@ def main() -> None:
             else:
                 updated_users = users.copy()
                 registered = register_user(updated_users, login, password)
-                save_json(DATA_DIR / "users.json", updated_users)
+                save_users(DATA_DIR / "users.json", updated_users)
                 users = updated_users
                 user = registered
             print("Вы вошли в аккаунт")
@@ -93,9 +89,10 @@ def main() -> None:
         print(
             "\n1. Все студии\n2. Поиск по названию\n"
             "3. Информация о студии\n4. Бронирование\n"
-            "5. Мои бронирования\n6. Студии по цене\n0. Выход"
+            "5. Мои бронирования\n6. Студии по цене\n"
+            "7. Отменить бронь\n0. Выход"
         )
-        action = input_range("Действие: ", 0, 6)
+        action = input_range("Действие: ", 0, 7)
         try:
             if action == 0:
                 return
@@ -110,21 +107,33 @@ def main() -> None:
                 show_studios(studios)
                 studio = get_studio(studios, input_int("Номер студии: "))
                 day, start, end = choose_date_of_booking(
-                    bookings, studio["id"])
+                    bookings, studio.id)
                 updated_bookings = bookings.copy()
                 booking = create_booking(
-                    updated_bookings, studio, user["login"], day, start, end
+                    updated_bookings, studio, user, day, start, end
                 )
-                save_json(DATA_DIR / "date_of_booking.json", updated_bookings)
+                save_bookings(
+                    DATA_DIR / "date_of_booking.json", updated_bookings
+                )
                 bookings = updated_bookings
                 print(
-                    f'Бронь №{booking["id"]} сохранена. '
-                    f'Стоимость: {booking["total_price"]} руб.'
+                    f'Бронь №{booking.id} сохранена. '
+                    f'Стоимость: {booking.total_price} руб.'
                 )
             elif action == 5:
-                show_bookings(bookings, studios, user["login"])
+                show_bookings(bookings, user)
             elif action == 6:
                 show_studios(sort_studios_by_price(studios))
+            elif action == 7:
+                show_bookings(bookings, user)
+                booking_id = input_int("Номер вашей брони: ")
+                updated_bookings = [copy(b) for b in bookings]
+                cancel_booking(updated_bookings, booking_id, user)
+                save_bookings(
+                    DATA_DIR / "date_of_booking.json", updated_bookings
+                )
+                bookings = updated_bookings
+                print("Бронирование отменено")
         except (ValueError, OSError) as error:
             print(error)
 

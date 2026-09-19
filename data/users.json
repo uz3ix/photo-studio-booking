@@ -1,10 +1,20 @@
 [
-    {
-        "login": "admin",
-        "password": 1234
-    },
-    {
-        "login": "ivan",
-        "password": 4321
-    }
+  {
+    "login": "admin",
+    "password": "1234",
+    "id": 1,
+    "is_active": true
+  },
+  {
+    "login": "ivan",
+    "password": "4321",
+    "id": 2,
+    "is_active": true
+  },
+  {
+    "id": 3,
+    "login": "archive_pr2",
+    "password": "",
+    "is_active": false
+  }
 ]
