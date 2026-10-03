@@ -1,17 +1,17 @@
 from copy import copy
 from pathlib import Path
 
-from module.bookings import (
+from models.bookings import (
     Booking, cancel_booking, create_booking, is_available,
 )
-from module.storage import (
+from storage import (
     load_bookings, load_studios, load_users, save_bookings, save_users,
 )
-from module.studios import (
+from models.studios import (
     Studio, get_studio, search_studios, sort_studios_by_price,
 )
-from module.users import User, authorisation, register_user
-from module.utils import input_date, input_int, input_range
+from models.users import User, authorisation, register_user
+from utils import input_date, input_int, input_range
 
 DATA_DIR = Path(__file__).resolve().parent / "data"
 
