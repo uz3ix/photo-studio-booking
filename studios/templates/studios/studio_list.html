@@ -1,0 +1,3 @@
+{% extends "base.html" %}
+{% block title %}Каталог фотостудий{% endblock %}
+{% block content %}<h1>Фотостудии</h1><p>Всего фотостудий: {{ studios|length }}</p>{% for studio in studios %}{% include "studios/includes/studio_card.html" with studio=studio only %}{% empty %}<p>Фотостудии пока не добавлены.</p>{% endfor %}{% endblock %}

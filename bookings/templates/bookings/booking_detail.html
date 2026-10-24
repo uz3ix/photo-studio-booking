@@ -1,0 +1,3 @@
+{% extends "base.html" %}
+{% block title %}Бронирование №{{ booking.id }}{% endblock %}
+{% block content %}<article class="card"><h1>Бронирование №{{ booking.id }}</h1><p>Студия: <a href="{% url 'studios:detail' booking.studio.id %}">{{ booking.studio.name }}</a></p><p>Дата: {{ booking.booking_date }}</p><p>Время: {{ booking.start_hour }}:00–{{ booking.end_hour }}:00</p><p>Пользователь: {{ booking.user.login }}</p><p>Стоимость: {{ booking.total_price|floatformat:"-2" }} руб.</p><p>Статус: {% include "bookings/includes/booking_status.html" with booking=booking only %}</p></article><a href="{% url 'bookings:list' %}">← К бронированиям</a>{% endblock %}

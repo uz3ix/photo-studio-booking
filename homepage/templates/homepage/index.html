@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero"><p class="text-uppercase text-secondary">Пространство для ваших идей</p><h1>Найдите студию для следующей съёмки</h1><p class="lead">Сравните площадь и стоимость залов, посмотрите расписание и информацию о бронированиях.</p><a class="btn btn-primary" href="{% url 'studios:list' %}">Посмотреть фотостудии</a></section>
+<section class="card"><h2>Ваши планы на съёмку</h2><p>Дата, студия, время и статус — в списке бронирований.</p><a href="{% url 'bookings:list' %}">Открыть бронирования →</a></section>
+{% endblock %}

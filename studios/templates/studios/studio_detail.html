@@ -1,0 +1,3 @@
+{% extends "base.html" %}
+{% block title %}{{ studio.name }}{% endblock %}
+{% block content %}<article class="card studio-card"><h1>{{ studio.name }}</h1><p>Площадь: {{ studio.area }} м²</p><p>Аренда: {{ studio.price_per_hour|floatformat:"-2" }} руб./час</p></article><h2>Расписание на {{ today }}</h2><ul class="list-group">{% for slot in slots %}<li class="list-group-item">{{ slot.start }}:00–{{ slot.end }}:00 {% if slot.is_free %}<span class="badge bg-success">свободно</span>{% else %}<span class="badge bg-danger">занято</span>{% endif %}</li>{% endfor %}</ul><a href="{% url 'studios:list' %}">← К списку студий</a>{% endblock %}

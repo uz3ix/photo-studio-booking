@@ -1,0 +1,8 @@
+{% load static %}
+<nav aria-label="Основная навигация">
+  <div class="container navigation">
+    <a href="{% url 'homepage:index' %}"><img class="studio-logo" src="{% static 'homepage/img/logo.svg' %}" alt="Фотостудии" width="40" height="40"> Главная</a>
+    <a href="{% url 'studios:list' %}">Каталог</a>
+    <a href="{% url 'bookings:list' %}">Бронирования</a>
+  </div>
+</nav>

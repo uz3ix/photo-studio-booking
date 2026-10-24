@@ -1,0 +1,3 @@
+{% extends "base.html" %}
+{% block title %}Бронирования{% endblock %}
+{% block content %}<h1>Бронирования</h1><p>Всего бронирований: {{ bookings|length }}</p><ul class="list-group">{% for booking in bookings %}<li class="list-group-item"><a href="{% url 'bookings:detail' booking.id %}">№{{ booking.id }} · {{ booking.studio.name }} · {{ booking.booking_date }}</a> {% include "bookings/includes/booking_status.html" with booking=booking only %}</li>{% empty %}<li class="list-group-item">Бронирований пока нет.</li>{% endfor %}</ul>{% endblock %}

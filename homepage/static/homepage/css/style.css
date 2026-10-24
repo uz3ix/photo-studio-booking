@@ -1,0 +1,17 @@
+body { background: #f4f5f7; color: #182335; margin: 0; font-family: Arial, sans-serif; min-height: 100vh; }
+.container { max-width: 1080px; margin: auto; padding: 24px; }
+nav { background: #182335; }
+.navigation { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; }
+nav a { color: white; display: inline-flex; align-items: center; gap: 8px; padding: 8px 0; }
+a { color: #2758a5; }
+h1 { margin: 0 0 24px; }
+.card, .list-group-item { background: white; padding: 20px; border: 1px solid #dce1e8; border-radius: 10px; margin-bottom: 12px; overflow-wrap: anywhere; }
+.studio-card { border-left: 4px solid #2758a5; }
+.badge { display: inline-block; padding: 6px 10px; border-radius: 6px; }
+.bg-success { background: #176d4b !important; color: white; }
+.bg-secondary { background: #596575 !important; color: white; }
+.bg-danger { background: #ae3340 !important; color: white; }
+.booking-status { font-weight: 600; }
+.hero { padding: 40px 0; }
+[hidden] { display: none !important; }
+@media (max-width: 480px) { .container { padding: 16px; } h1 { font-size: 1.8rem; } }

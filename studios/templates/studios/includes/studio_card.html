@@ -1,0 +1,1 @@
+<article class="card studio-card"><h2><a href="{% url 'studios:detail' studio.id %}">{{ studio.name|default:"Без названия" }}</a></h2><p>Площадь: {{ studio.area }} м² · {{ studio.price_per_hour|floatformat:"-2" }} руб./час</p></article>

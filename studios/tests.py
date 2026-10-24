@@ -49,3 +49,18 @@ def test_studio_read_only(web_client):
     assert web_client.post("/studios/1/").status_code == 405
     web_client.get("/studios/1/")
     assert path.read_bytes() == before
+
+
+def test_studio_list_length_filter(web_client):
+    html = web_client.get("/studios/").content.decode()
+    assert "Всего фотостудий: 1" in html
+
+
+def test_studio_card_include_and_default_filter():
+    from django.template.loader import render_to_string
+
+    html = render_to_string("studios/includes/studio_card.html", {
+        "studio": {"id": 1, "name": "", "area": 50,
+                   "price_per_hour": 1000},
+    })
+    assert "Без названия" in html

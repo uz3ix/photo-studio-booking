@@ -44,3 +44,10 @@ def test_booking_read_only(web_client):
     assert web_client.post("/bookings/1/").status_code == 405
     web_client.get("/bookings/")
     assert path.read_bytes() == before
+
+
+def test_booking_status_include_and_length_filter(web_client):
+    html = web_client.get("/bookings/").content.decode()
+    assert "Всего бронирований: 2" in html
+    assert "booking-status-active" in html
+    assert "booking-status-cancelled" in html
