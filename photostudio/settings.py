@@ -5,6 +5,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
+SQLITE_DB_PATH = DATA_DIR / "photo_studio.sqlite"
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "pr5-local-development-only")
 DEBUG = True
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "[::1]"]

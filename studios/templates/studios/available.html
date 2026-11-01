@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Свободные фотостудии{% endblock %}
+{% block content %}
+<h1>Свободные фотостудии</h1>
+<form method="get" class="card search-form"><label for="date">Дата бронирования:</label><input type="date" id="date" name="date" value="{{ booking_date }}" required><button class="btn btn-primary" type="submit">Найти</button></form>
+{% if booking_date %}<h2>Свободно на {{ booking_date }}</h2>{% for studio in studios %}{% include "studios/includes/studio_card.html" with studio=studio only %}{% empty %}<p>На выбранную дату свободных студий нет.</p>{% endfor %}{% endif %}
+{% endblock %}

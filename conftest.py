@@ -6,6 +6,8 @@ import django
 import pytest
 from django.test import Client, override_settings
 
+from db.import_json import import_json
+
 from models.bookings import Booking
 from models.studios import Studio
 from models.users import User
@@ -26,5 +28,9 @@ def web_client(tmp_path):
     save_studios(tmp_path / "studios.json", [studio])
     save_users(tmp_path / "users.json", [user])
     save_bookings(tmp_path / "date_of_booking.json", [active, cancelled])
-    with override_settings(DATA_DIR=tmp_path, ALLOWED_HOSTS=["testserver"]):
+    db_path = tmp_path / "photo_studio.sqlite"
+    import_json(tmp_path, db_path)
+    with override_settings(
+        DATA_DIR=tmp_path, SQLITE_DB_PATH=db_path, ALLOWED_HOSTS=["testserver"],
+    ):
         yield Client()
