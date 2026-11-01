@@ -1,3 +1,37 @@
 {% extends "base.html" %}
-{% block title %}Бронирования{% endblock %}
-{% block content %}<h1>Активные бронирования</h1><p>Всего активных бронирований: {{ bookings|length }}</p><ul class="list-group">{% for booking in bookings %}<li class="list-group-item"><a href="{% url 'bookings:detail' booking.id %}">№{{ booking.id }} · {{ booking.studio_name }} · {{ booking.booking_date }}</a><br>Время: {{ booking.start_hour }}:00–{{ booking.end_hour }}:00 · Клиент: {{ booking.user_login }} · {{ booking.total_price }} руб.{% empty %}<li class="list-group-item">Активных бронирований пока нет.</li>{% endfor %}</ul>{% endblock %}
+
+{% block title %}
+    Бронирования
+{% endblock %}
+
+{% block content %}
+    <h1>Активные бронирования</h1>
+
+    <p>
+        Всего активных бронирований:
+        {{ bookings|length }}
+    </p>
+
+    <ul class="list-group">
+        {% for booking in bookings %}
+            <li class="list-group-item">
+                <a href="{% url 'bookings:detail' booking.id %}">
+                    №{{ booking.id }} ·
+                    {{ booking.studio_name }} ·
+                    {{ booking.booking_date }}
+                </a>
+
+                <br>
+
+                Время:
+                {{ booking.start_hour }}:00–{{ booking.end_hour }}:00
+                · Клиент: {{ booking.user_login }}
+                · {{ booking.total_price }} руб.
+            </li>
+        {% empty %}
+            <li class="list-group-item">
+                Активных бронирований пока нет.
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

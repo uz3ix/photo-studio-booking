@@ -1,3 +1,20 @@
 {% extends "base.html" %}
 {% block title %}Бронирование №{{ booking.id }}{% endblock %}
-{% block content %}<article class="card"><h1>Бронирование №{{ booking.id }}</h1><p>Студия: <a href="{% url 'studios:detail' booking.studio_id %}">{{ booking.studio_name }}</a></p><p>Дата: {{ booking.booking_date }}</p><p>Время: {{ booking.start_hour }}:00–{{ booking.end_hour }}:00</p><p>Пользователь: {{ booking.user_login }}</p><p>Стоимость: {{ booking.total_price }} руб.</p><p>Статус: {% if booking.is_cancelled %}<span class="badge bg-secondary">отменена</span>{% else %}<span class="badge bg-success">активна</span>{% endif %}</p></article><a href="{% url 'bookings:list' %}">← К бронированиям</a>{% endblock %}
+{% block content %}
+<article class="card">
+    <h1>Бронирование №{{ booking.id }}</h1>
+    <p>Студия: <a href="{% url 'studios:detail' booking.studio_id %}">{{ booking.studio_name }}</a>
+    </p>
+    <p>Дата: {{ booking.booking_date }}</p>
+    <p>Время: {{ booking.start_hour }}:00–{{ booking.end_hour }}:00</p>
+    <p>Пользователь: {{ booking.user_login }}</p>
+    <p>Стоимость: {{ booking.total_price }} руб.</p>
+    <p>Статус: 
+        {% if booking.is_cancelled %}
+        <span class="badge bg-secondary">отменена</span>
+        {% else %}
+        <span class="badge bg-success">активна</span>
+        {% endif %}
+    </p>
+    </article><a href="{% url 'bookings:list' %}">← К бронированиям</a>
+{% endblock %}
