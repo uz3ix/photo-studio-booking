@@ -1,6 +1,7 @@
-"""Каталог, карточка, экранирование и расписание."""
+"""Каталог, карточка, SQL-поиск, экранирование и расписание."""
 
 from datetime import date
+import sqlite3
 
 import pytest
 from django.conf import settings
@@ -32,14 +33,19 @@ def test_missing_studio(web_client, url):
 
 
 def test_empty_catalog(web_client):
-    (settings.DATA_DIR / "studios.json").write_text("[]", encoding="utf-8")
+    with sqlite3.connect(settings.SQLITE_DB_PATH) as connection:
+        connection.execute("DELETE FROM bookings")
+        connection.execute("DELETE FROM studios")
     response = web_client.get("/studios/")
     assert response.status_code == 200
     assert "пока не добавлены" in response.content.decode()
 
 
-def test_corrupt_catalog(web_client):
-    (settings.DATA_DIR / "studios.json").write_text("{", encoding="utf-8")
+def test_database_error(web_client, monkeypatch):
+    def fail_connection(*args, **kwargs):
+        raise sqlite3.Error("database unavailable")
+
+    monkeypatch.setattr("studios.views.get_connection", fail_connection)
     assert web_client.get("/studios/").status_code == 503
 
 
@@ -54,6 +60,14 @@ def test_studio_read_only(web_client):
 def test_studio_list_length_filter(web_client):
     html = web_client.get("/studios/").content.decode()
     assert "Всего фотостудий: 1" in html
+
+
+def test_available_studios_uses_date_parameter(web_client):
+    response = web_client.get("/studios/available/?date=2026-10-03")
+    assert response.status_code == 200
+    html = response.content.decode()
+    assert "2026-10-03" in html
+    assert "Свободных фотостудий" not in html
 
 
 def test_studio_card_include_and_default_filter():

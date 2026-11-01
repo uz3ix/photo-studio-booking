@@ -1,4 +1,4 @@
-"""Настройки локального учебного проекта ПР5."""
+"""Настройки локального учебного проекта ПР7."""
 
 import os
 from pathlib import Path
@@ -43,7 +43,7 @@ TEMPLATES = [{
 }]
 WSGI_APPLICATION = "photostudio.wsgi.application"
 ASGI_APPLICATION = "photostudio.asgi.application"
-# Предметные данные остаются в JSON; постоянная БД на ПР5 не создаётся.
+# Django ORM пока не используется: SQL-слой подключается через sqlite3 и db/.
 DATABASES = {"default": {
     "ENGINE": "django.db.backends.sqlite3", "NAME": ":memory:",
 }}

@@ -13,7 +13,11 @@ def load_json(path: Path):
 
 
 def import_json(data_dir: Path, db_path: Path | None = None) -> None:
-    """Заменить содержимое SQLite данными студий, пользователей и броней."""
+    """Заменить содержимое SQLite данными студий, пользователей и броней.
+
+    Таблицы очищаются в порядке от зависимых к главным, а вставка выполняется
+    в порядке внешних ключей: studios, users, bookings.
+    """
     initialize_database(db_path)
     studios = load_json(data_dir / "studios.json")
     users = load_json(data_dir / "users.json")
@@ -24,17 +28,24 @@ def import_json(data_dir: Path, db_path: Path | None = None) -> None:
         connection.execute("DELETE FROM users")
         connection.execute("DELETE FROM studios")
         connection.executemany(
-            "INSERT INTO studios VALUES (?, ?, ?, ?)",
+            """INSERT INTO studios
+               (id, name, area, price_per_hour)
+               VALUES (?, ?, ?, ?)""",
             [(x["id"], x["name"], x["area"], x["price_per_hour"])
              for x in studios],
         )
         connection.executemany(
-            "INSERT INTO users VALUES (?, ?, ?, ?)",
+            """INSERT INTO users
+               (id, login, password, is_active)
+               VALUES (?, ?, ?, ?)""",
             [(x["id"], x["login"], x.get("password", ""),
               int(x.get("is_active", True))) for x in users],
         )
         connection.executemany(
-            "INSERT INTO bookings VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            """INSERT INTO bookings
+               (id, studio_id, user_id, booking_date, start_hour,
+                end_hour, is_cancelled, total_price)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
             [(x["id"], x["studio_id"], x["user_id"], x["booking_date"],
               x["start_hour"], x["end_hour"], int(x["is_cancelled"]),
               x["total_price"]) for x in bookings],
@@ -49,10 +60,17 @@ def import_json(data_dir: Path, db_path: Path | None = None) -> None:
 
 def main() -> None:
     """Импортировать данные из каталога data."""
-    from django.conf import settings
-    import django
-    django.setup()
-    import_json(settings.DATA_DIR, settings.SQLITE_DB_PATH)
+    try:
+        from django.conf import settings
+        import django
+        django.setup()
+        data_dir = settings.DATA_DIR
+        db_path = settings.SQLITE_DB_PATH
+    except ImportError:
+        from db.database import BASE_DIR, DB_PATH
+        data_dir = BASE_DIR / "data"
+        db_path = DB_PATH
+    import_json(data_dir, db_path)
 
 
 if __name__ == "__main__":
